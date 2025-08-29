@@ -4,6 +4,7 @@ import com.thanh1407.moneymanagement.dto.ProfileDTO;
 import com.thanh1407.moneymanagement.entity.ProfileEntity;
 import com.thanh1407.moneymanagement.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -14,10 +15,12 @@ public class ProfileService {
 
     private final ProfileRepository profileRepository;
     // private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
 
     public ProfileDTO registerProfile(ProfileDTO profileDTO){
         ProfileEntity newProfile = toEntity(profileDTO);
         newProfile.setActivationToken(UUID.randomUUID().toString());
+//        newProfile.setPassword(passwordEncoder.encode(newProfile.getPassword()));
         newProfile = profileRepository.save(newProfile);
         
         // Comment out email sending functionality
@@ -36,6 +39,7 @@ public class ProfileService {
         return ProfileEntity.builder()
                 .id(profileDTO.getId())
                 .fullName(profileDTO.getFullName())
+                .password(passwordEncoder.encode(profileDTO.getPassword()))
                 .email(profileDTO.getEmail())
                 .profileImageUrl(profileDTO.getProfileImageUrl())
                 .createdAt(profileDTO.getCreatedAt())
