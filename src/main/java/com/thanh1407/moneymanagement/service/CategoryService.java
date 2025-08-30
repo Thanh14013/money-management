@@ -27,10 +27,17 @@ public class CategoryService {
         return toDTO(newCategory);
     }
 
-    //get category for current user
+    //get category bt type for current user
     public List<CategoryDTO> getCategoriesForCurrentUser(){
         ProfileEntity profile = profileService.getCurrentProfile();
         List<CategoryEntity> categories = categoryRepository.findByProfileId(profile.getId());
+        return categories.stream().map(this::toDTO).toList();
+    }
+
+    //get category by type for current user
+    public List<CategoryDTO> getCategoriesByTypeForCurrentUser(String type){
+        ProfileEntity profile = profileService.getCurrentProfile();
+        List<CategoryEntity> categories = categoryRepository.findByProfileIdAndType(profile.getId(), type);
         return categories.stream().map(this::toDTO).toList();
     }
 
