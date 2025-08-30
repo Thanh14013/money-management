@@ -7,6 +7,7 @@ import com.thanh1407.moneymanagement.entity.ProfileEntity;
 import com.thanh1407.moneymanagement.repository.CategoryRepository;
 import com.thanh1407.moneymanagement.repository.ExpenseRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -53,7 +54,7 @@ public class ExpenseService {
     }
 
     //Get  latest top 5 expenses for current user
-    public List<ExpenseDTO> getLatestExpensesForCurrentUser() {
+    public List<ExpenseDTO> getLatest5ExpensesForCurrentUser() {
         ProfileEntity profile = profileService.getCurrentProfile();
         List<ExpenseEntity> list = expenseRepository.findTop5ByProfileIdOrderByDateDesc(profile.getId());
         return list.stream().map(this::toDTO).toList();
@@ -64,6 +65,19 @@ public class ExpenseService {
         ProfileEntity profile = profileService.getCurrentProfile();
         BigDecimal total = expenseRepository.findTotalExpenseByProfileId(profile.getId());
         return total != null ? total : BigDecimal.ZERO;
+    }
+
+    //filter expenses
+    public List<ExpenseDTO> filterExpenses(LocalDate startDate, LocalDate endDate, String keyword, Sort sort){
+        ProfileEntity profile = profileService.getCurrentProfile();
+        List<ExpenseEntity> list = expenseRepository.findByProfileIdAndDateBetweenAndNameContainingIgnoreCase(
+                profile.getId(),
+                startDate,
+                endDate,
+                keyword,
+                sort
+        );
+        return list.stream().map(this::toDTO).toList();
     }
 
     //helper methods

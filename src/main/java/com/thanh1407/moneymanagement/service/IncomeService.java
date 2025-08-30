@@ -3,11 +3,13 @@ package com.thanh1407.moneymanagement.service;
 import com.thanh1407.moneymanagement.dto.IncomeDTO;
 import com.thanh1407.moneymanagement.dto.IncomeDTO;
 import com.thanh1407.moneymanagement.dto.IncomeDTO;
+import com.thanh1407.moneymanagement.dto.IncomeDTO;
 import com.thanh1407.moneymanagement.entity.*;
 import com.thanh1407.moneymanagement.entity.IncomeEntity;
 import com.thanh1407.moneymanagement.repository.CategoryRepository;
 import com.thanh1407.moneymanagement.repository.IncomeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -54,7 +56,7 @@ public class IncomeService {
     }
 
     //Get  latest top 5 incomes for current user
-    public List<IncomeDTO> getLatestIncomesForCurrentUser() {
+    public List<IncomeDTO> getLatest5IncomesForCurrentUser() {
         ProfileEntity profile = profileService.getCurrentProfile();
         List<IncomeEntity> list = incomeRepository.findTop5ByProfileIdOrderByDateDesc(profile.getId());
         return list.stream().map(this::toDTO).toList();
@@ -65,6 +67,19 @@ public class IncomeService {
         ProfileEntity profile = profileService.getCurrentProfile();
         BigDecimal total = incomeRepository.findTotalIncomeByProfileId(profile.getId());
         return total != null ? total : BigDecimal.ZERO;
+    }
+
+    //filter incomes
+    public List<IncomeDTO> filterIncomes(LocalDate startDate, LocalDate endDate, String keyword, Sort sort){
+        ProfileEntity profile = profileService.getCurrentProfile();
+        List<IncomeEntity> list = incomeRepository.findByProfileIdAndDateBetweenAndNameContainingIgnoreCase(
+                profile.getId(),
+                startDate,
+                endDate,
+                keyword,
+                sort
+        );
+        return list.stream().map(this::toDTO).toList();
     }
 
     //helper methods
