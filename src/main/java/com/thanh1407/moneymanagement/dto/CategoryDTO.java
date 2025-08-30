@@ -11,13 +11,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProfileDTO {
+public class CategoryDTO {
 
     private Long id;
-    private String fullName;
-    private String email;
-    private String password;
-    private String profileImageUrl;
+    private Long profileId;
+    private String name;
+    private String type;
+    private String icon;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
 }
