@@ -1,9 +1,13 @@
 package com.thanh1407.moneymanagement.service;
 
+import com.thanh1407.moneymanagement.dto.AuthDTO;
 import com.thanh1407.moneymanagement.dto.ProfileDTO;
 import com.thanh1407.moneymanagement.entity.ProfileEntity;
 import com.thanh1407.moneymanagement.repository.ProfileRepository;
+import com.thanh1407.moneymanagement.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -11,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -20,6 +25,8 @@ public class ProfileService {
     private final ProfileRepository profileRepository;
     // private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
 
     public ProfileDTO registerProfile(ProfileDTO profileDTO){
         ProfileEntity newProfile = toEntity(profileDTO);
@@ -86,7 +93,7 @@ public class ProfileService {
 
     public ProfileDTO getPublicProfile(String email){
         ProfileEntity currentUser = null;
-        if (email != null) {
+        if (email == null) {
             currentUser = getCurrentProfile();
         }else{
             currentUser = profileRepository.findByEmail(email)
@@ -100,5 +107,35 @@ public class ProfileService {
                 .createdAt(currentUser.getCreatedAt())
                 .updatedAt(currentUser.getUpdatedAt())
                 .build();
+    }
+
+    public Map<String, Object> authenticateAndGenerateToken(AuthDTO authDTO) {
+        try{
+            System.out.println("Attempting authentication for email: " + authDTO.getEmail());
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authDTO.getEmail(), authDTO.getPassword()));
+            System.out.println("Authentication successful for: " + authDTO.getEmail());
+
+            //Generate token
+            String token = jwtUtil.generateToken(authDTO.getEmail());
+            System.out.println("Token generated successfully");
+
+            ProfileDTO userProfile = getPublicProfile(authDTO.getEmail());
+            System.out.println("User profile retrieved successfully");
+
+            return Map.of(
+                    "token", token,
+                    "user", userProfile
+            );
+        }catch (org.springframework.security.authentication.BadCredentialsException e){
+            System.err.println("Bad credentials for email: " + authDTO.getEmail());
+            throw new IllegalArgumentException("Invalid email or password");
+        }catch (org.springframework.security.authentication.DisabledException e){
+            System.err.println("Account disabled for email: " + authDTO.getEmail());
+            throw new IllegalArgumentException("Account is disabled");
+        }catch (Exception e){
+            System.err.println("Authentication error: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            e.printStackTrace();
+            throw new IllegalArgumentException("Authentication failed: " + e.getMessage());
+        }
     }
 }
