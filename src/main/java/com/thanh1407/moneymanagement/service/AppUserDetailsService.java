@@ -20,10 +20,20 @@ public class AppUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         ProfileEntity existingProfile =  profileRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+
+        // Kiểm tra tài khoản có được kích hoạt hay không
+        if (existingProfile.getIsActive() == null || !existingProfile.getIsActive()) {
+            throw new UsernameNotFoundException("Account is not activated");
+        }
+
         return User.builder()
                 .username(existingProfile.getEmail())
                 .password(existingProfile.getPassword())
                 .authorities(Collections.emptyList())
+                .accountExpired(false)
+                .accountLocked(false)
+                .credentialsExpired(false)
+                .disabled(false)
                 .build();
     }
 }
