@@ -59,4 +59,9 @@ public class ProfileController {
             ));
         }
     }
+
+    @GetMapping("/test")
+    public String test(){
+        return "thanh cong roi";
+    }
 }
