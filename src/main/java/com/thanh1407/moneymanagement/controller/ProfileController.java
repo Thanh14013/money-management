@@ -60,8 +60,9 @@ public class ProfileController {
         }
     }
 
-    @GetMapping("/test")
-    public String test(){
-        return "thanh cong roi";
+    @GetMapping("/profile")
+    public ResponseEntity<ProfileDTO> getPublicProfile(){
+        ProfileDTO profileDTO = profileService.getPublicProfile(null);
+        return ResponseEntity.ok(profileDTO);
     }
 }

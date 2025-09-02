@@ -31,10 +31,11 @@ public class ProfileService {
     public ProfileDTO registerProfile(ProfileDTO profileDTO){
         ProfileEntity newProfile = toEntity(profileDTO);
         newProfile.setActivationToken(UUID.randomUUID().toString());
-//        newProfile.setPassword(passwordEncoder.encode(newProfile.getPassword()));
+        // Tự động kích hoạt tài khoản ngay khi đăng ký
+        newProfile.setIsActive(true);
         newProfile = profileRepository.save(newProfile);
         
-        // Comment out email sending functionality
+        // Comment out email sending functionality - không cần gửi email kích hoạt nữa
         /*
         //send activate email
         String activationLink =  "http://localhost:8080/api/v1.0/activate?token=" + newProfile.getActivationToken();
@@ -55,6 +56,7 @@ public class ProfileService {
                 .profileImageUrl(profileDTO.getProfileImageUrl())
                 .createdAt(profileDTO.getCreatedAt())
                 .updatedAt(profileDTO.getUpdatedAt())
+                .isActive(true) // Mặc định kích hoạt ngay
                 .build();
     }
 
@@ -112,6 +114,27 @@ public class ProfileService {
     public Map<String, Object> authenticateAndGenerateToken(AuthDTO authDTO) {
         try{
             System.out.println("Attempting authentication for email: " + authDTO.getEmail());
+            System.out.println("Password provided (raw): " + authDTO.getPassword());
+
+            // Kiểm tra tài khoản trước khi authenticate
+            ProfileEntity user = profileRepository.findByEmail(authDTO.getEmail()).orElse(null);
+            if (user != null) {
+                System.out.println("User found in database:");
+                System.out.println("- Email: " + user.getEmail());
+                System.out.println("- IsActive: " + user.getIsActive());
+                System.out.println("- Password hash: " + user.getPassword());
+
+                // Tự động kích hoạt tài khoản nếu chưa được kích hoạt (cho dev testing)
+                if (user.getIsActive() == null || !user.getIsActive()) {
+                    System.out.println("Account not activated, auto-activating for development...");
+                    user.setIsActive(true);
+                    profileRepository.save(user);
+                    System.out.println("Account activated successfully");
+                }
+            } else {
+                System.err.println("User not found in database for email: " + authDTO.getEmail());
+            }
+
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authDTO.getEmail(), authDTO.getPassword()));
             System.out.println("Authentication successful for: " + authDTO.getEmail());
 
@@ -128,6 +151,7 @@ public class ProfileService {
             );
         }catch (org.springframework.security.authentication.BadCredentialsException e){
             System.err.println("Bad credentials for email: " + authDTO.getEmail());
+            System.err.println("BadCredentialsException details: " + e.getMessage());
             throw new IllegalArgumentException("Invalid email or password");
         }catch (org.springframework.security.authentication.DisabledException e){
             System.err.println("Account disabled for email: " + authDTO.getEmail());
