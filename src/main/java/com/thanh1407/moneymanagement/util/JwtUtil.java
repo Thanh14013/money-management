@@ -18,8 +18,8 @@ public class JwtUtil {
     @Value("${api.secret.key}")
     private String SECRET_KEY;
 
-    // Thời gian sống của token (1 tiếng)
-    private final long EXPIRATION_TIME = 1000 * 60 * 60;
+    // Thời gian sống của token (3 tiếng)
+    private final long EXPIRATION_TIME = 1000 * 60 * 60 * 3;
 
     // Cache signing key để đảm bảo consistency
     private SecretKey cachedSigningKey;
