@@ -60,29 +60,16 @@ The backend is built using Spring Boot with a RESTful API architecture, while su
 
 ## 🛠 Technology Stack
 
-### Backend Technologies
-- **Java 21** - Core programming language
-- **Spring Boot 3.5.5** - Main framework
+- **Java** - Backend programming language
+- **Spring Boot** - Main framework
 - **Spring Security** - Authentication and authorization
-- **Spring Data JPA** - Data persistence layer
-- **Spring Web** - RESTful API development
-- **Spring Mail** - Email functionality
-
-### Database
-- **MySQL** - Primary database
-- **Hibernate** - ORM framework
-- **JPA** - Data access abstraction
-
-### Security & Authentication
-- **JWT (JSON Web Tokens)** - Token-based authentication
-- **BCrypt** - Password hashing
-- **Spring Security** - Security framework
-
-### Additional Libraries & Tools
-- **Lombok** - Boilerplate code reduction
-- **Maven** - Dependency management and build tool
-- **JJWT** - JWT library for Java
-- **MySQL Connector/J** - Database connectivity
+- **Spring Data JPA** - Data persistence
+- **MySQL** - Database
+- **JWT** - Token-based authentication
+- **BCrypt** - Password encryption
+- **Lombok** - Code generation
+- **Maven** - Build tool
+- **Brevo SMTP** - Email service
 
 ### External Services
 - **Brevo SMTP** - Email service provider
